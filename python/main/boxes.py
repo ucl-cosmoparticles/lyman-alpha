@@ -236,19 +236,24 @@ class SimulationBox(Box):
     def _generate_general_spectra_instance(self, cofm):
         axis = np.ones(cofm.shape[0])
         return sa.Spectra(self._snap_num, self._snap_dir, cofm, axis, res=self._spectrum_pixel_width.value, reload_file=True)
+    
+    def save_file(self):
+        self.get_optical_depth(save_file=True)
 
-    def get_optical_depth(self):
+    def get_optical_depth(self,save_file=False):
         tau = self.spectra_instance.get_tau(self.element, self.ion, int(self.line_wavelength.value))
-        self.spectra_instance.save_file()  # Save spectra to file
+        if save_file:
+            self.spectra_instance.save_file()  # Save spectra to file
         return tau
 
-    def get_column_density(self, element = None, ion = None):
+    def get_column_density(self, element = None, ion = None, save_file=False):
         if element is None:
             element = self.element
         if ion is None:
             ion = self.ion
         col_density = self.spectra_instance.get_col_density(element, ion) / (u.cm * u.cm)
-        self.spectra_instance.save_file()
+        if save_file:
+            self.spectra_instance.save_file()
         return col_density
 
     def get_optical_depth_real(self, element=None, ion=None): #Should really calculate pre-factor
