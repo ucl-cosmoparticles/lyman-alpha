@@ -9,7 +9,6 @@ import astropy.units as u
 
 from fake_spectra import spectra as sa
 from fake_spectra import griddedspectra as gs
-from fake_spectra import randspectra as rs
 
 import sys
 
@@ -189,7 +188,9 @@ class GaussianBox(Box):
 
 class SimulationBox(Box):
     """Sub-class to generate a box of Lyman-alpha spectra drawn from HDF5 simulations"""
-    def __init__(self, snap_num, snap_dir, grid_samps, spectrum_pixel_width, spectrograph_FWHM='default', reload_snapshot=True, spectra_savefile_root='gridded_spectra', spectra_savedir=None):
+    def __init__(self, snap_num, snap_dir, grid_samps, spectrum_pixel_width,
+            axis=1, spectrograph_FWHM='default', reload_snapshot=True,
+            spectra_savefile_root='gridded_spectra', spectra_savedir=None):
         self._n_samp = {}
         self._n_samp['x'] = grid_samps
         self._n_samp['y'] = grid_samps
@@ -202,6 +203,7 @@ class SimulationBox(Box):
         self._snap_dir = snap_dir
         self._grid_samps = grid_samps
         self._spectrum_pixel_width = spectrum_pixel_width
+        self._axis = axis
         self._reload_snapshot = reload_snapshot
         self._spectra_savefile_root = spectra_savefile_root
         self.spectra_savedir = spectra_savedir
@@ -212,12 +214,22 @@ class SimulationBox(Box):
         self.line_wavelength = 1215 * u.angstrom
 
         if spectrograph_FWHM == 'default':
-            self.spectra_instance = gs.GriddedSpectra(self._snap_num, self._snap_dir, nspec=self._grid_samps, res=self._spectrum_pixel_width.value, savefile=self.spectra_savefile, savedir=self.spectra_savedir, reload_file=self._reload_snapshot)
+            self.spectra_instance = gs.GriddedSpectra(self._snap_num,
+                    self._snap_dir, nspec=self._grid_samps,
+                    res=self._spectrum_pixel_width.value,
+                    axis=self._axis,
+                    savefile=self.spectra_savefile,
+                    savedir=self.spectra_savedir,
+                    reload_file=self._reload_snapshot)
         else:
-            self.spectra_instance = gs.GriddedSpectra(self._snap_num, self._snap_dir, nspec=self._grid_samps,
-                                                      res=self._spectrum_pixel_width.value,
-                                                      savefile=self.spectra_savefile, savedir=self.spectra_savedir,
-                                                      reload_file=self._reload_snapshot, spec_res=spectrograph_FWHM.to(u.km/u.s).value)
+            self.spectra_instance = gs.GriddedSpectra(self._snap_num,
+                    self._snap_dir, nspec=self._grid_samps,
+                    res=self._spectrum_pixel_width.value,
+                    axis=self._axis,
+                    savefile=self.spectra_savefile,
+                    savedir=self.spectra_savedir,
+                    reload_file=self._reload_snapshot,
+                    spec_res=spectrograph_FWHM.to(u.km/u.s).value)
 
         self._n_samp['z'] = int(self.spectra_instance.vmax / self.spectra_instance.dvbin)
         H0 = (self.spectra_instance.hubble * 100. * u.km) / (u.s * u.Mpc)
@@ -234,7 +246,7 @@ class SimulationBox(Box):
         self._dodge_dist = 10. * u.kpc
 
     def _generate_general_spectra_instance(self, cofm):
-        axis = np.ones(cofm.shape[0])
+        axis = self._axis*np.ones(cofm.shape[0])
         return sa.Spectra(self._snap_num, self._snap_dir, cofm, axis, res=self._spectrum_pixel_width.value, reload_file=True)
     
     def save_file(self):
