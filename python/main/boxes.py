@@ -236,7 +236,7 @@ class SimulationBox(Box):
         super(SimulationBox, self).__init__(self.spectra_instance.red, H0, self.spectra_instance.OmegaM, nskewers)
         self.voxel_velocities['x'] = (self.spectra_instance.vmax / self._n_samp['x']) * (u.km / u.s)
         self.voxel_velocities['y'] = (self.spectra_instance.vmax / self._n_samp['y']) * (u.km / u.s)
-        self.voxel_velocities['z'] = self.spectra_instance.dvbin * (u.km / u.s)
+        self.voxel_velocities['z'] = (self.spectra_instance.vmax / self._n_samp['z']) * (u.km / u.s)
         print("Size of voxels in velocity units =", self.voxel_velocities)
         for i in ['x','y','z']:
             #Comoving units
