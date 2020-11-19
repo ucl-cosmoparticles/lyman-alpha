@@ -231,9 +231,17 @@ class SimulationBox(Box):
                     reload_file=self._reload_snapshot,
                     spec_res=spectrograph_FWHM.to(u.km/u.s).value)
 
-        self._n_samp['z'] = int(self.spectra_instance.vmax / self.spectra_instance.dvbin)
+        # figure out number of pixels along one line of sight
+        n_samp_z=self.spectra_instance.vmax / self.spectra_instance.dvbin
+        self._n_samp['z'] = int(np.around(n_samp_z))
+        assert np.isclose(self._n_samp['z'],n_samp_z)
+        print('n_samp_z',n_samp_z)
+
+        # figure Hubble parameter (to transform Mpc/h to Mpc)
         H0 = (self.spectra_instance.hubble * 100. * u.km) / (u.s * u.Mpc)
         super(SimulationBox, self).__init__(self.spectra_instance.red, H0, self.spectra_instance.OmegaM, nskewers)
+
+        # define voxels
         self.voxel_velocities['x'] = (self.spectra_instance.vmax / self._n_samp['x']) * (u.km / u.s)
         self.voxel_velocities['y'] = (self.spectra_instance.vmax / self._n_samp['y']) * (u.km / u.s)
         self.voxel_velocities['z'] = (self.spectra_instance.vmax / self._n_samp['z']) * (u.km / u.s)
