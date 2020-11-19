@@ -235,7 +235,6 @@ class SimulationBox(Box):
         n_samp_z=self.spectra_instance.vmax / self.spectra_instance.dvbin
         self._n_samp['z'] = int(np.around(n_samp_z))
         assert np.isclose(self._n_samp['z'],n_samp_z)
-        print('n_samp_z',n_samp_z)
 
         # figure Hubble parameter (to transform Mpc/h to Mpc)
         H0 = (self.spectra_instance.hubble * 100. * u.km) / (u.s * u.Mpc)
