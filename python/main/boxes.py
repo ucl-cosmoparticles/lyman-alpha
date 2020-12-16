@@ -69,8 +69,9 @@ class Box(object):
         y = self.k_i('y')[np.newaxis, :, np.newaxis]
         z = self.k_i('z')[np.newaxis, np.newaxis, :]
         k = np.sqrt(x**2 + y**2 + z**2)
-        k[k == 0.] = np.nan
-        return z / k
+        mu = z / k 
+        mu[k == 0.] = np.nan
+        return mu
 
     #Configuration space coordinates
     def r_i(self,i):
